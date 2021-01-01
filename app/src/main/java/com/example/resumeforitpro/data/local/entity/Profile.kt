@@ -1,4 +1,4 @@
-package com.example.resumeforitpro.data.model
+package com.example.resumeforitpro.data.local.entity
 
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable
@@ -7,21 +7,21 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "profile")
-class Profile(
+data class Profile(
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "profile_id")
-    private val profileId: Long,
+    var profileId: Long? = null,
 
     @NonNull
-    private val name: String,
+    var name: String,
 
     @NonNull
-    private val address: String,
+    var address: String,
 
     @NonNull
-    private val phone: Long,
+    var phone: Long,
 
     @Nullable
     @ColumnInfo(name = "profile_img_path")
-    private val profileImgPath: String
+    var profileImgPath: String
 )

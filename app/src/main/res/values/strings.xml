@@ -1,3 +1,15 @@
 <resources>
     <string name="app_name">Resume for IT Pro</string>
+    <string name="btn_label_profile">Profile</string>
+    <string name="hin_enter_full_name">Enter Full Name</string>
+    <string name="hint_enter_address">Enter address</string>
+    <string name="hint_enter_phone_number">Enter phone number</string>
+    <string name="btn_label_save_profile">Save Profile</string>
+
+    <string name="profile" >Profile</string>
+    <string name="education" >Education</string>
+    <string name="experience" >Experience</string>
+    <string name="project" >Project</string>
+    <string name="skill" >Skills</string>
+
 </resources>

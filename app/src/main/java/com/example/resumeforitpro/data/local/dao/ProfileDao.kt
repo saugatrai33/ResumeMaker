@@ -1,8 +1,8 @@
-package com.example.resumeforitpro.data.dao
+package com.example.resumeforitpro.data.local.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.example.resumeforitpro.data.model.Profile
+import com.example.resumeforitpro.data.local.entity.Profile
 
 @Dao
 interface ProfileDao {

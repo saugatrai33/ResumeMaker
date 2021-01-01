@@ -1,4 +1,4 @@
-package com.example.resumeforitpro.data.model
+package com.example.resumeforitpro.data.local.entity
 
 import androidx.annotation.NonNull
 import androidx.room.ColumnInfo
@@ -6,14 +6,14 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "project")
-class Project(
+data class Project(
     @ColumnInfo(name = "project_id")
     @PrimaryKey(autoGenerate = true)
-    private val projectId: Long,
+    var projectId: Long,
 
     @NonNull
-    private val title: String,
+    var title: String,
 
     @NonNull
-    private val description: String
+    var description: String
 )

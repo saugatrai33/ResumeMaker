@@ -1,4 +1,4 @@
-package com.example.resumeforitpro.data.model
+package com.example.resumeforitpro.data.local.entity
 
 import androidx.annotation.NonNull
 import androidx.room.ColumnInfo
@@ -7,23 +7,23 @@ import androidx.room.PrimaryKey
 import java.util.*
 
 @Entity(tableName = "experience")
-class Experience(
+data class Experience(
 
     @PrimaryKey(autoGenerate = true)
     @ColumnInfo(name = "experience_id")
-    private val experienceId: Long,
+    var experienceId: Long,
 
     @NonNull
-    private val company: String,
+    var company: String,
 
     @NonNull
-    private val title: String,
+    var title: String,
 
     @NonNull
     @ColumnInfo(name = "start_date")
-    private val startDate: Date,
+    var startDate: Date,
 
     @NonNull
     @ColumnInfo(name = "end_date")
-    private val endDate: Date
+    var endDate: Date
 )

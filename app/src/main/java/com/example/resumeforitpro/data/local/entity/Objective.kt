@@ -1,15 +1,15 @@
-package com.example.resumeforitpro.data.model
+package com.example.resumeforitpro.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "objective")
-class Objective(
+data class Objective(
 
     @ColumnInfo(name = "objective_id")
     @PrimaryKey(autoGenerate = true)
-    private val objectiveId: Long,
+    var objectiveId: Long,
 
-    private val title: String
+    var title: String
 )
