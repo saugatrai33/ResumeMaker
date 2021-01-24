@@ -6,10 +6,18 @@
     <string name="hint_enter_phone_number">Enter phone number</string>
     <string name="btn_label_save_profile">Save Profile</string>
 
-    <string name="profile" >Profile</string>
-    <string name="education" >Education</string>
-    <string name="experience" >Experience</string>
-    <string name="project" >Project</string>
-    <string name="skill" >Skills</string>
+    <string name="profile">Profile</string>
+    <string name="education">Education</string>
+    <string name="experience">Experience</string>
+    <string name="project">Project</string>
+    <string name="skill">Skills</string>
+
+    <string name="msg_profile_null">All profile fields are necessary.</string>
+    <string name="permission_denied">Permission denied.</string>
+    <string name="hint_degree">Degree</string>
+    <string name="hint_course">Course</string>
+    <string name="hint_school_university">School/University</string>
+    <string name="hint_completion_year">Completion Year</string>
+    <string name="btn_label_add">ADD</string>
 
 </resources>

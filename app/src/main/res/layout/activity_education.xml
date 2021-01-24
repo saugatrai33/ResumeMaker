@@ -1,55 +1,54 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="@dimen/_16dp"
+    tools:context=".ui.home.education.EducationActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="@dimen/_0dp"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/btn_add"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <com.facebook.drawee.view.SimpleDraweeView
-            android:id="@+id/img_profile"
-            android:layout_width="match_parent"
-            android:layout_height="@dimen/_200dp"
-            android:layout_marginBottom="@dimen/_16dp"
-            app:placeholderImage="@drawable/ic_baseline_account_circle_24"
-            app:placeholderImageScaleType="centerCrop" />
-
         <EditText
-            android:id="@+id/text_profile_name"
+            android:id="@+id/text_degree"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/hin_enter_full_name"
-            android:inputType="textPersonName" />
+            android:hint="@string/hint_degree" />
 
         <EditText
-            android:id="@+id/text_profile_address"
+            android:id="@+id/text_course"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/hint_enter_address"
-            android:inputType="text" />
+            android:hint="@string/hint_course" />
 
         <EditText
-            android:id="@+id/text_profile_phone"
+            android:id="@+id/text_university"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/hint_enter_phone_number"
-            android:inputType="phone" />
+            android:hint="@string/hint_school_university" />
+
+        <EditText
+            android:id="@+id/text_completion_year"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/hint_completion_year" />
 
     </LinearLayout>
 
     <Button
-        android:id="@+id/btn_profile_save"
+        android:id="@+id/btn_add"
         style="@style/Widget.AppCompat.Button.Colored"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/btn_label_save_profile"
+        android:text="@string/btn_label_add"
+        android:textAllCaps="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
