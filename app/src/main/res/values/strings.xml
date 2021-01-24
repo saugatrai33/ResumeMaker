@@ -19,5 +19,12 @@
     <string name="hint_school_university">School/University</string>
     <string name="hint_completion_year">Completion Year</string>
     <string name="btn_label_add">ADD</string>
+    <string name="hint_company_name">Company Name</string>
+    <string name="hint_job_title">Job Title</string>
+    <string name="btn_label_start_date">Start Date</string>
+    <string name="btn_label_end_date">End Date</string>
+    <string name="label_details">Details</string>
+    <string name="hint_roles_responsibility">Roles/Responsibility</string>
+    <string name="btn_label_add_experience">Add Experience</string>
 
 </resources>
