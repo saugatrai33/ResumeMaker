@@ -26,5 +26,7 @@
     <string name="label_details">Details</string>
     <string name="hint_roles_responsibility">Roles/Responsibility</string>
     <string name="btn_label_add_experience">Add Experience</string>
+    <string name="hint_skill_eg_android_ios">Skill. eg. Android, iOS</string>
+    <string name="btn_label_add_skill">Add Skill</string>
 
 </resources>
