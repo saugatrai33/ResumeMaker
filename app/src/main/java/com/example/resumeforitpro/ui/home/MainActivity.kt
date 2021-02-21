@@ -1,11 +1,13 @@
 package com.example.resumeforitpro.ui.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.resumeforitpro.R
+import com.example.resumeforitpro.ui.profile.ProfileActivity
 import com.facebook.drawee.backends.pipeline.Fresco
 
 class MainActivity : AppCompatActivity(), OnHomeItemClickListener {
@@ -38,6 +40,9 @@ class MainActivity : AppCompatActivity(), OnHomeItemClickListener {
     }
 
     override fun onHomeItemClick(homeItem: String) {
-        Toast.makeText(this, homeItem, Toast.LENGTH_SHORT).show()
+        if (homeItem == getString(R.string.profile)) {
+            startActivity(Intent(this,
+                ProfileActivity::class.java))
+        }
     }
 }

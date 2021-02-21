@@ -14,6 +14,13 @@ class ProfileViewModel(
 ) : ViewModel() {
     private val profile = MutableLiveData<Resource<Profile>>()
 
+    init {
+        viewModelScope.launch {
+            profile.postValue(Resource.loading(null))
+            profile.postValue(Resource.success(databaseHelper.getProfile()))
+        }
+    }
+
     /**
      * Save profile to room database
      *
@@ -29,9 +36,9 @@ class ProfileViewModel(
 
     fun updateProfile(updatedProfile: Profile) {
         viewModelScope.launch {
-//            profile.postValue(Resource.loading(null))
+            profile.postValue(Resource.loading(null))
             databaseHelper.updateProfile(updatedProfile)
-//            profile.postValue(Resource.success(data = updatedProfile))
+            profile.postValue(Resource.success(data = updatedProfile))
         }
     }
 

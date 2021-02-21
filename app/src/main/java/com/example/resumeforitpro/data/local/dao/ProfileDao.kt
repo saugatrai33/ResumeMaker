@@ -1,6 +1,5 @@
 package com.example.resumeforitpro.data.local.dao
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.resumeforitpro.data.local.entity.Profile
 
