@@ -26,7 +26,6 @@ class ProfileActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Fresco.initialize(this)
-
         setContentView(R.layout.activity_profile)
 
         profileViewModel = ViewModelProviders.of(

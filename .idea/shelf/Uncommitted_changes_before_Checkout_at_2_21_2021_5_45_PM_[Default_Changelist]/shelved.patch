@@ -1,0 +1,262 @@
+Index: app/src/main/java/com/example/resumeforitpro/ui/profile/ProfileActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.resumeforitpro.ui.profile\r\n\r\nimport android.Manifest\r\nimport android.app.Activity\r\nimport android.content.Intent\r\nimport android.content.pm.PackageManager\r\nimport android.os.Build\r\nimport android.os.Bundle\r\nimport android.os.Environment\r\nimport android.util.Log\r\nimport android.widget.Button\r\nimport android.widget.EditText\r\nimport android.widget.Toast\r\nimport androidx.appcompat.app.AppCompatActivity\r\nimport androidx.lifecycle.ViewModelProviders\r\nimport com.example.resumeforitpro.R\r\nimport com.example.resumeforitpro.data.local.DatabaseBuilder\r\nimport com.example.resumeforitpro.data.local.DatabaseHelperImpl\r\nimport com.example.resumeforitpro.data.local.entity.Profile\r\nimport com.example.resumeforitpro.utils.ResumeViewModelFactory\r\nimport com.example.resumeforitpro.utils.Status\r\nimport com.facebook.drawee.backends.pipeline.Fresco\r\nimport com.facebook.drawee.view.SimpleDraweeView\r\nimport java.io.File\r\n\r\nclass ProfileActivity : AppCompatActivity() {\r\n\r\n    companion object {\r\n        //image pick code\r\n        private val IMAGE_PICK_CODE = 1000;\r\n\r\n        //Permission code\r\n        private val PERMISSION_CODE = 1001;\r\n    }\r\n\r\n    private var CODEINSERTUPDATE: Int = 0\r\n\r\n    private lateinit var profileViewModel: ProfileViewModel\r\n\r\n    private var profilePhoto: SimpleDraweeView? = null\r\n    private var profileName: EditText? = null\r\n    private var profileAddress: EditText? = null\r\n    private var profilePhone: EditText? = null\r\n\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        Fresco.initialize(this)\r\n\r\n        setContentView(R.layout.activity_profile)\r\n\r\n        supportActionBar!!.setDisplayHomeAsUpEnabled(true)\r\n\r\n        profileViewModel = ViewModelProviders.of(\r\n            this,\r\n            ResumeViewModelFactory(\r\n                DatabaseHelperImpl(DatabaseBuilder.getInstance(applicationContext))\r\n            )\r\n        ).get(ProfileViewModel::class.java)\r\n        setupProfileObserver()\r\n\r\n        val fileName = \"Resume Picture\"\r\n        val dir = File(Environment.getExternalStorageDirectory(), fileName)\r\n        if (!dir.exists()) {\r\n            dir.mkdir()\r\n        }\r\n\r\n        profilePhoto = findViewById(R.id.img_profile)\r\n        profileName = findViewById(R.id.text_profile_name)\r\n        profileAddress = findViewById(R.id.text_profile_address)\r\n        profilePhone = findViewById(R.id.text_profile_phone)\r\n        val btnSave = findViewById<Button>(R.id.btn_profile_save)\r\n        btnSave.setOnClickListener { getProfileNSave() }\r\n        profilePhoto!!.setOnClickListener { checkPhotoPermission() }\r\n\r\n    }\r\n\r\n    private fun checkPhotoPermission() {\r\n        //check runtime permission\r\n        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {\r\n            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) ==\r\n                PackageManager.PERMISSION_DENIED\r\n            ) {\r\n                //permission denied\r\n                val permissions = arrayOf(Manifest.permission.READ_EXTERNAL_STORAGE)\r\n                //show popup to request runtime permission\r\n                requestPermissions(permissions, PERMISSION_CODE);\r\n            } else {\r\n                //permission already granted\r\n                pickImageFromGallery();\r\n            }\r\n        } else {\r\n            //system OS is < Marshmallow\r\n            pickImageFromGallery();\r\n        }\r\n    }\r\n\r\n    private fun pickImageFromGallery() {\r\n        //Intent to pick image\r\n        val intent = Intent(Intent.ACTION_PICK)\r\n        intent.type = \"image/*\"\r\n        startActivityForResult(intent, IMAGE_PICK_CODE)\r\n    }\r\n\r\n    //handle requested permission result\r\n    override fun onRequestPermissionsResult(\r\n        requestCode: Int,\r\n        permissions: Array<out String>,\r\n        grantResults: IntArray\r\n    ) {\r\n        when (requestCode) {\r\n            PERMISSION_CODE -> {\r\n                if (grantResults.isNotEmpty() && grantResults[0] ==\r\n                    PackageManager.PERMISSION_GRANTED\r\n                ) {\r\n                    //permission from popup granted\r\n                    pickImageFromGallery()\r\n                } else {\r\n                    //permission from popup denied\r\n                    Toast.makeText(\r\n                        this, R.string.permission_denied,\r\n                        Toast.LENGTH_SHORT\r\n                    ).show()\r\n                }\r\n            }\r\n        }\r\n    }\r\n\r\n    //handle result of picked image\r\n    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {\r\n        super.onActivityResult(requestCode, resultCode, data)\r\n        if (resultCode == Activity.RESULT_OK && requestCode == IMAGE_PICK_CODE) {\r\n            profilePhoto!!.setImageURI(data?.data)\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Get the profile data from UI and send to local db.\r\n     * */\r\n    private fun getProfileNSave() {\r\n        val name: String = profileName!!.text.toString().trim()\r\n        val address: String = profileAddress!!.text.toString().trim()\r\n        val phoneNum: String = profilePhone!!.text.toString().trim()\r\n\r\n        if (name.isEmpty() || address.isEmpty() || phoneNum.isEmpty()) {\r\n            Toast.makeText(\r\n                this, R.string.msg_profile_null,\r\n                Toast.LENGTH_SHORT\r\n            ).show()\r\n            return\r\n        }\r\n\r\n        val profile = Profile(\r\n            name = name,\r\n            address = address,\r\n            phone = phoneNum.toLong(),\r\n            profileImgPath = \"\"\r\n        )\r\n\r\n        if (CODEINSERTUPDATE == 0) {\r\n            profileViewModel.saveProfileToDb(newProfile = profile)\r\n        } else {\r\n            profileViewModel.updateProfile(updatedProfile = profile)\r\n        }\r\n\r\n\r\n    }\r\n\r\n    private fun setupProfileObserver() {\r\n        profileViewModel.getProfile().observe(this, {\r\n            when (it.status) {\r\n                Status.SUCCESS -> {\r\n                    it.data?.let { profile ->\r\n                        CODEINSERTUPDATE = 1\r\n                        profileName!!.setText(profile.name)\r\n                        profileAddress!!.setText(profile.address)\r\n                        profilePhone!!.setText(profile.phone.toString())\r\n                    }\r\n                }\r\n                Status.LOADING -> {\r\n\r\n                }\r\n                Status.ERROR -> {\r\n                    Log.d(\"MainActivity\", \"setupProfileObserver: error\")\r\n                }\r\n            }\r\n        })\r\n    }\r\n\r\n    // Checks if a volume containing external storage is available\r\n// for read and write.\r\n    fun isExternalStorageWritable(): Boolean {\r\n        return Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED\r\n    }\r\n\r\n    // Checks if a volume containing external storage is available to at least read.\r\n    fun isExternalStorageReadable(): Boolean {\r\n        return Environment.getExternalStorageState() in\r\n                setOf(Environment.MEDIA_MOUNTED, Environment.MEDIA_MOUNTED_READ_ONLY)\r\n    }\r\n\r\n\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/resumeforitpro/ui/profile/ProfileActivity.kt	(revision 247863e93de2a825a66f56e4ebba9711fa2081f2)
++++ app/src/main/java/com/example/resumeforitpro/ui/profile/ProfileActivity.kt	(date 1613908554259)
+@@ -7,18 +7,12 @@
+ import android.os.Build
+ import android.os.Bundle
+ import android.os.Environment
+-import android.util.Log
+ import android.widget.Button
+ import android.widget.EditText
+ import android.widget.Toast
+ import androidx.appcompat.app.AppCompatActivity
+-import androidx.lifecycle.ViewModelProviders
+ import com.example.resumeforitpro.R
+-import com.example.resumeforitpro.data.local.DatabaseBuilder
+-import com.example.resumeforitpro.data.local.DatabaseHelperImpl
+ import com.example.resumeforitpro.data.local.entity.Profile
+-import com.example.resumeforitpro.utils.ResumeViewModelFactory
+-import com.example.resumeforitpro.utils.Status
+ import com.facebook.drawee.backends.pipeline.Fresco
+ import com.facebook.drawee.view.SimpleDraweeView
+ import java.io.File
+@@ -27,10 +21,10 @@
+ 
+     companion object {
+         //image pick code
+-        private val IMAGE_PICK_CODE = 1000;
++        private const val IMAGE_PICK_CODE = 1000;
+ 
+         //Permission code
+-        private val PERMISSION_CODE = 1001;
++        private const val PERMISSION_CODE = 1001;
+     }
+ 
+     private var CODEINSERTUPDATE: Int = 0
+@@ -45,17 +39,8 @@
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+         Fresco.initialize(this)
+-
+         setContentView(R.layout.activity_profile)
+-
+         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+-
+-        profileViewModel = ViewModelProviders.of(
+-            this,
+-            ResumeViewModelFactory(
+-                DatabaseHelperImpl(DatabaseBuilder.getInstance(applicationContext))
+-            )
+-        ).get(ProfileViewModel::class.java)
+         setupProfileObserver()
+ 
+         val fileName = "Resume Picture"
+@@ -166,24 +151,7 @@
+     }
+ 
+     private fun setupProfileObserver() {
+-        profileViewModel.getProfile().observe(this, {
+-            when (it.status) {
+-                Status.SUCCESS -> {
+-                    it.data?.let { profile ->
+-                        CODEINSERTUPDATE = 1
+-                        profileName!!.setText(profile.name)
+-                        profileAddress!!.setText(profile.address)
+-                        profilePhone!!.setText(profile.phone.toString())
+-                    }
+-                }
+-                Status.LOADING -> {
+ 
+-                }
+-                Status.ERROR -> {
+-                    Log.d("MainActivity", "setupProfileObserver: error")
+-                }
+-            }
+-        })
+     }
+ 
+     // Checks if a volume containing external storage is available
+Index: app/src/main/res/layout/activity_project.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<androidx.constraintlayout.widget.ConstraintLayout xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    xmlns:app=\"http://schemas.android.com/apk/res-auto\"\r\n    xmlns:tools=\"http://schemas.android.com/tools\"\r\n    android:layout_width=\"match_parent\"\r\n    android:layout_height=\"match_parent\"\r\n    tools:context=\".ui.home.projects.ProjectActivity\">\r\n\r\n</androidx.constraintlayout.widget.ConstraintLayout>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/layout/activity_project.xml	(revision 247863e93de2a825a66f56e4ebba9711fa2081f2)
++++ app/src/main/res/layout/activity_project.xml	(date 1611485114915)
+@@ -6,4 +6,28 @@
+     android:layout_height="match_parent"
+     tools:context=".ui.home.projects.ProjectActivity">
+ 
++    <LinearLayout
++        android:layout_width="match_parent"
++        android:layout_height="wrap_content"
++        app:layout_constraintEnd_toEndOf="parent"
++        android:orientation="vertical"
++        app:layout_constraintStart_toStartOf="parent"
++        app:layout_constraintTop_toTopOf="parent">
++
++        <EditText
++            android:id="@+id/text_project_title"
++            android:layout_width="wrap_content"
++            android:layout_height="wrap_content"
++            android:hint="@string/hint_project_title"/>
++
++        <EditText
++            android:id="@+id/text_project_detail"
++            android:layout_width="match_parent"
++            android:layout_height="wrap_content"
++            android:lines="6"
++            android:gravity="top|start"
++            android:hint="@string/hint_project_title"/>
++
++    </LinearLayout>
++
+ </androidx.constraintlayout.widget.ConstraintLayout>
+\ No newline at end of file
+Index: app/src/main/java/com/example/resumeforitpro/ui/home/projects/ProjectActivity.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.resumeforitpro.ui.home.projects\r\n\r\nimport androidx.appcompat.app.AppCompatActivity\r\nimport android.os.Bundle\r\n\r\nclass ProjectActivity : AppCompatActivity() {\r\n    override fun onCreate(savedInstanceState: Bundle?) {\r\n        super.onCreate(savedInstanceState)\r\n        setContentView(R.layout.activity_project)\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/resumeforitpro/ui/home/projects/ProjectActivity.kt	(revision 247863e93de2a825a66f56e4ebba9711fa2081f2)
++++ app/src/main/java/com/example/resumeforitpro/ui/home/projects/ProjectActivity.kt	(date 1611485114900)
+@@ -2,10 +2,12 @@
+ 
+ import androidx.appcompat.app.AppCompatActivity
+ import android.os.Bundle
++import com.example.resumeforitpro.R
+ 
+ class ProjectActivity : AppCompatActivity() {
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+         setContentView(R.layout.activity_project)
++
+     }
+ }
+\ No newline at end of file
+Index: app/src/main/AndroidManifest.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<manifest xmlns:android=\"http://schemas.android.com/apk/res/android\"\r\n    package=\"com.example.resumeforitpro\"\r\n    android:installLocation=\"preferExternal\">\r\n\r\n    <uses-permission android:name=\"android.permission.READ_EXTERNAL_STORAGE\" />\r\n    <uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />\r\n    <uses-permission android:name=\"android.permission.MANAGE_EXTERNAL_STORAGE\" />\r\n\r\n    <application\r\n        android:allowBackup=\"true\"\r\n        android:icon=\"@mipmap/ic_launcher\"\r\n        android:label=\"@string/app_name\"\r\n        android:roundIcon=\"@mipmap/ic_launcher_round\"\r\n        android:supportsRtl=\"true\"\r\n        android:theme=\"@style/AppTheme\">\r\n        <activity android:name=\".ui.home.skill.SkillActivity\"></activity>\r\n        <activity android:name=\".ui.home.experience.ExperienceActivity\" />\r\n        <activity android:name=\".ui.home.education.EducationActivity\" />\r\n        <activity\r\n            android:name=\".ui.profile.ProfileActivity\"\r\n            android:parentActivityName=\".ui.home.MainActivity\" />\r\n        <activity android:name=\".ui.home.MainActivity\">\r\n            <intent-filter>\r\n                <action android:name=\"android.intent.action.MAIN\" />\r\n\r\n                <category android:name=\"android.intent.category.LAUNCHER\" />\r\n            </intent-filter>\r\n        </activity>\r\n    </application>\r\n\r\n</manifest>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/AndroidManifest.xml	(revision 247863e93de2a825a66f56e4ebba9711fa2081f2)
++++ app/src/main/AndroidManifest.xml	(date 1611484263788)
+@@ -14,7 +14,8 @@
+         android:roundIcon="@mipmap/ic_launcher_round"
+         android:supportsRtl="true"
+         android:theme="@style/AppTheme">
+-        <activity android:name=".ui.home.skill.SkillActivity"></activity>
++        <activity android:name=".ui.home.projects.ProjectActivity"></activity>
++        <activity android:name=".ui.home.skill.SkillActivity" />
+         <activity android:name=".ui.home.experience.ExperienceActivity" />
+         <activity android:name=".ui.home.education.EducationActivity" />
+         <activity
+Index: app/src/main/java/com/example/resumeforitpro/ui/profile/ProfileViewModel.kt
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>package com.example.resumeforitpro.ui.profile\r\n\r\nimport androidx.lifecycle.LiveData\r\nimport androidx.lifecycle.MutableLiveData\r\nimport androidx.lifecycle.ViewModel\r\nimport androidx.lifecycle.viewModelScope\r\nimport com.example.resumeforitpro.data.local.DatabaseHelper\r\nimport com.example.resumeforitpro.data.local.entity.Profile\r\nimport com.example.resumeforitpro.utils.Resource\r\nimport kotlinx.coroutines.launch\r\n\r\nclass ProfileViewModel(\r\n    private val databaseHelper: DatabaseHelper\r\n) : ViewModel() {\r\n    private val profile = MutableLiveData<Resource<Profile>>()\r\n\r\n    init {\r\n        viewModelScope.launch {\r\n            profile.postValue(Resource.loading(null))\r\n            profile.postValue(Resource.success(databaseHelper.getProfile()))\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Save profile to room database\r\n     *\r\n     * @param newProfile the updated profile.\r\n     * */\r\n    fun saveProfileToDb(newProfile: Profile) {\r\n        viewModelScope.launch {\r\n            profile.postValue(Resource.loading(null))\r\n            databaseHelper.insertProfile(profile = newProfile)\r\n            profile.postValue(Resource.success(data = newProfile))\r\n        }\r\n    }\r\n\r\n    fun updateProfile(updatedProfile: Profile) {\r\n        viewModelScope.launch {\r\n            profile.postValue(Resource.loading(null))\r\n            databaseHelper.updateProfile(updatedProfile)\r\n            profile.postValue(Resource.success(data = updatedProfile))\r\n        }\r\n    }\r\n\r\n    /**\r\n     * Get the update profile from room database.\r\n     * */\r\n    fun getProfile(): LiveData<Resource<Profile>> {\r\n        return profile\r\n    }\r\n}
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/java/com/example/resumeforitpro/ui/profile/ProfileViewModel.kt	(revision 247863e93de2a825a66f56e4ebba9711fa2081f2)
++++ app/src/main/java/com/example/resumeforitpro/ui/profile/ProfileViewModel.kt	(date 1613908331988)
+@@ -6,7 +6,6 @@
+ import androidx.lifecycle.viewModelScope
+ import com.example.resumeforitpro.data.local.DatabaseHelper
+ import com.example.resumeforitpro.data.local.entity.Profile
+-import com.example.resumeforitpro.utils.Resource
+ import kotlinx.coroutines.launch
+ 
+ class ProfileViewModel(
+Index: app/build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>apply plugin: 'com.android.application'\r\n\r\napply plugin: 'kotlin-android'\r\n\r\napply plugin: 'kotlin-android-extensions'\r\n\r\napply plugin: 'kotlin-kapt'\r\n\r\nandroid {\r\n    compileSdkVersion 30\r\n    buildToolsVersion \"29.0.2\"\r\n    defaultConfig {\r\n        applicationId \"com.example.resumeforitpro\"\r\n        minSdkVersion 21\r\n        targetSdkVersion 30\r\n        versionCode 1\r\n        versionName \"1.0\"\r\n        testInstrumentationRunner \"androidx.test.runner.AndroidJUnitRunner\"\r\n    }\r\n\r\n    packagingOptions {\r\n        exclude 'META-INF/atomicfu.kotlin_module'\r\n    }\r\n\r\n    kotlinOptions {\r\n        jvmTarget = \"1.8\"\r\n    }\r\n\r\n    buildTypes {\r\n        release {\r\n            minifyEnabled false\r\n            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'\r\n        }\r\n    }\r\n\r\n}\r\n\r\ndependencies {\r\n\r\n    implementation fileTree(dir: 'libs', include: ['*.jar'])\r\n    implementation \"org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version\"\r\n    implementation 'androidx.appcompat:appcompat:1.2.0'\r\n    implementation 'androidx.core:core-ktx:1.3.2'\r\n    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'\r\n    implementation 'androidx.cardview:cardview:1.0.0'\r\n    testImplementation 'junit:junit:4.13.1'\r\n    androidTestImplementation 'androidx.test.ext:junit:1.1.2'\r\n    androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'\r\n\r\n    /**\r\n     * Room database components\r\n     * */\r\n    implementation \"androidx.room:room-runtime:2.2.5\"\r\n    kapt \"androidx.room:room-compiler:2.2.5\"\r\n    implementation \"androidx.room:room-ktx:2.2.5\"\r\n\r\n    /**\r\n     * Lifecycle components\r\n     * */\r\n    implementation 'android.arch.lifecycle:extensions:2.2.0'\r\n    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'\r\n\r\n\r\n    /**\r\n     * Kotlin components\r\n     * */\r\n    api \"org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9\"\r\n    api \"org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9\"\r\n\r\n    /**\r\n     * Fresco for image\r\n     * */\r\n    implementation 'com.facebook.fresco:fresco:2.3.0'\r\n\r\n\r\n    /**\r\n     * Debug Room database\r\n     * */\r\n    debugImplementation 'com.amitshekhar.android:debug-db:1.0.6'\r\n\r\n    /**\r\n     * RecyclerView\r\n     * */\r\n    implementation 'androidx.recyclerview:recyclerview:1.1.0'\r\n\r\n    /**\r\n     * CardView\r\n     * */\r\n    implementation 'androidx.legacy:legacy-support-v4:1.0.0'\r\n\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/build.gradle	(revision 247863e93de2a825a66f56e4ebba9711fa2081f2)
++++ app/build.gradle	(date 1613908246693)
+@@ -50,22 +50,22 @@
+     /**
+      * Room database components
+      * */
+-    implementation "androidx.room:room-runtime:2.2.5"
+-    kapt "androidx.room:room-compiler:2.2.5"
+-    implementation "androidx.room:room-ktx:2.2.5"
++    implementation "androidx.room:room-runtime:2.2.6"
++    kapt "androidx.room:room-compiler:2.2.6"
++    implementation "androidx.room:room-ktx:2.2.6"
+ 
+     /**
+      * Lifecycle components
+      * */
+     implementation 'android.arch.lifecycle:extensions:2.2.0'
+-    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.2.0'
++    implementation 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.3.0'
+ 
+ 
+     /**
+      * Kotlin components
+      * */
+-    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.9"
+-    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.3.9"
++    api "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.4.2"
++    api "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.4.2"
+ 
+     /**
+      * Fresco for image
+Index: build.gradle
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>// Top-level build file where you can add configuration options common to all sub-projects/modules.\r\n\r\nbuildscript {\r\n    ext.kotlin_version = '1.4.21'\r\n    repositories {\r\n        google()\r\n        jcenter()\r\n\r\n    }\r\n    dependencies {\r\n        classpath 'com.android.tools.build:gradle:4.1.1'\r\n        classpath \"org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version\"\r\n        // NOTE: Do not place your application dependencies here; they belong\r\n        // in the individual module build.gradle files\r\n    }\r\n}\r\n\r\nallprojects {\r\n    repositories {\r\n        google()\r\n        jcenter()\r\n\r\n    }\r\n}\r\n\r\ntask clean(type: Delete) {\r\n    delete rootProject.buildDir\r\n}\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- build.gradle	(revision 247863e93de2a825a66f56e4ebba9711fa2081f2)
++++ build.gradle	(date 1613908246701)
+@@ -1,14 +1,14 @@
+ // Top-level build file where you can add configuration options common to all sub-projects/modules.
+ 
+ buildscript {
+-    ext.kotlin_version = '1.4.21'
++    ext.kotlin_version = '1.4.30'
+     repositories {
+         google()
+         jcenter()
+ 
+     }
+     dependencies {
+-        classpath 'com.android.tools.build:gradle:4.1.1'
++        classpath 'com.android.tools.build:gradle:4.1.2'
+         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+         // NOTE: Do not place your application dependencies here; they belong
+         // in the individual module build.gradle files
+Index: app/src/main/res/values/strings.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><resources>\r\n    <string name=\"app_name\">Resume for IT Pro</string>\r\n    <string name=\"btn_label_profile\">Profile</string>\r\n    <string name=\"hin_enter_full_name\">Enter Full Name</string>\r\n    <string name=\"hint_enter_address\">Enter address</string>\r\n    <string name=\"hint_enter_phone_number\">Enter phone number</string>\r\n    <string name=\"btn_label_save_profile\">Save Profile</string>\r\n\r\n    <string name=\"profile\">Profile</string>\r\n    <string name=\"education\">Education</string>\r\n    <string name=\"experience\">Experience</string>\r\n    <string name=\"project\">Project</string>\r\n    <string name=\"skill\">Skills</string>\r\n\r\n    <string name=\"msg_profile_null\">All profile fields are necessary.</string>\r\n    <string name=\"permission_denied\">Permission denied.</string>\r\n    <string name=\"hint_degree\">Degree</string>\r\n    <string name=\"hint_course\">Course</string>\r\n    <string name=\"hint_school_university\">School/University</string>\r\n    <string name=\"hint_completion_year\">Completion Year</string>\r\n    <string name=\"btn_label_add\">ADD</string>\r\n    <string name=\"hint_company_name\">Company Name</string>\r\n    <string name=\"hint_job_title\">Job Title</string>\r\n    <string name=\"btn_label_start_date\">Start Date</string>\r\n    <string name=\"btn_label_end_date\">End Date</string>\r\n    <string name=\"label_details\">Details</string>\r\n    <string name=\"hint_roles_responsibility\">Roles/Responsibility</string>\r\n    <string name=\"btn_label_add_experience\">Add Experience</string>\r\n    <string name=\"hint_skill_eg_android_ios\">Skill. eg. Android, iOS</string>\r\n    <string name=\"btn_label_add_skill\">Add Skill</string>\r\n\r\n</resources>\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+--- app/src/main/res/values/strings.xml	(revision 247863e93de2a825a66f56e4ebba9711fa2081f2)
++++ app/src/main/res/values/strings.xml	(date 1611485114907)
+@@ -28,5 +28,6 @@
+     <string name="btn_label_add_experience">Add Experience</string>
+     <string name="hint_skill_eg_android_ios">Skill. eg. Android, iOS</string>
+     <string name="btn_label_add_skill">Add Skill</string>
++    <string name="hint_project_title">Project Title</string>
+ 
+ </resources>
