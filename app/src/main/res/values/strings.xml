@@ -28,5 +28,8 @@
     <string name="btn_label_add_experience">Add Experience</string>
     <string name="hint_skill_eg_android_ios">Skill. eg. Android, iOS</string>
     <string name="btn_label_add_skill">Add Skill</string>
+    <string name="hint_name_of_the_project">Name of the Project</string>
+    <string name="hint_project_details">Project details including roles and responsibilities</string>
+    <string name="hint_project_link">Project Link</string>
 
 </resources>

@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:padding="@dimen/_16dp"
-    tools:context=".ui.home.experience.ExperienceActivity">
+    tools:context=".ui.experience.ExperienceActivity">
 
     <LinearLayout
         android:layout_width="match_parent"

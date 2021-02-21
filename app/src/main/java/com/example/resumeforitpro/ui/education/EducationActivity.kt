@@ -1,4 +1,4 @@
-package com.example.resumeforitpro.ui.home.education
+package com.example.resumeforitpro.ui.education
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

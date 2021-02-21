@@ -1,4 +1,4 @@
-package com.example.resumeforitpro.ui.home.skill
+package com.example.resumeforitpro.ui.skill
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
