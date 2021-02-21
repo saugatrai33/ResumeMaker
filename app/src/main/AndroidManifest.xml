@@ -14,7 +14,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".ui.home.education.EducationActivity"></activity>
+        <activity android:name=".ui.home.experience.ExperienceActivity"></activity>
+        <activity android:name=".ui.home.education.EducationActivity" />
         <activity
             android:name=".ui.profile.ProfileActivity"
             android:parentActivityName=".ui.home.MainActivity" />
