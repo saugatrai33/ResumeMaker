@@ -5,16 +5,16 @@
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
 
     <application
+        android:name=".ResumeApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name="com.example.resumeforitpro.ui.skill.SkillActivity"></activity>
+        <activity android:name="com.example.resumeforitpro.ui.skill.SkillActivity" />
         <activity android:name="com.example.resumeforitpro.ui.experience.ExperienceActivity" />
         <activity android:name="com.example.resumeforitpro.ui.education.EducationActivity" />
         <activity

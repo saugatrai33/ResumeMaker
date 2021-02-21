@@ -7,33 +7,34 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Environment
-import android.util.Log
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProviders
 import com.example.resumeforitpro.R
-import com.example.resumeforitpro.data.local.DatabaseBuilder
-import com.example.resumeforitpro.data.local.DatabaseHelperImpl
-import com.example.resumeforitpro.data.local.entity.Profile
+import com.example.resumeforitpro.ResumeApp
+import com.example.resumeforitpro.datasource.local.entity.Profile
+import com.example.resumeforitpro.utils.toast
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.drawee.view.SimpleDraweeView
 import java.io.File
+import javax.inject.Inject
 
+/**
+ * Show Profile screen
+ * */
 class ProfileActivity : AppCompatActivity() {
 
     companion object {
         //image pick code
-        private val IMAGE_PICK_CODE = 1000;
+        private const val IMAGE_PICK_CODE = 1000
 
         //Permission code
-        private val PERMISSION_CODE = 1001;
+        private const val PERMISSION_CODE = 1001
     }
 
-    private var CODEINSERTUPDATE: Int = 0
-
-    private lateinit var profileViewModel: ProfileViewModel
+    @Inject
+    lateinit var profileViewModel: ProfileViewModel
 
     private var profilePhoto: SimpleDraweeView? = null
     private var profileName: EditText? = null
@@ -41,11 +42,16 @@ class ProfileActivity : AppCompatActivity() {
     private var profilePhone: EditText? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+
+        (application as ResumeApp).resumeComponents.inject(this)
+
         super.onCreate(savedInstanceState)
+
         Fresco.initialize(this)
         setContentView(R.layout.activity_profile)
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
         setupProfileObserver()
 
         val fileName = "Resume Picture"
@@ -61,6 +67,7 @@ class ProfileActivity : AppCompatActivity() {
         val btnSave = findViewById<Button>(R.id.btn_profile_save)
         btnSave.setOnClickListener { getProfileNSave() }
         profilePhoto!!.setOnClickListener { checkPhotoPermission() }
+
 
     }
 
@@ -132,10 +139,7 @@ class ProfileActivity : AppCompatActivity() {
         val phoneNum: String = profilePhone!!.text.toString().trim()
 
         if (name.isEmpty() || address.isEmpty() || phoneNum.isEmpty()) {
-            Toast.makeText(
-                this, R.string.msg_profile_null,
-                Toast.LENGTH_SHORT
-            ).show()
+            this.toast(R.string.msg_profile_null)
             return
         }
 
@@ -146,6 +150,7 @@ class ProfileActivity : AppCompatActivity() {
             profileImgPath = ""
         )
 
+        profileViewModel.insertProfile(profile)
 
     }
 
@@ -154,7 +159,7 @@ class ProfileActivity : AppCompatActivity() {
     }
 
     // Checks if a volume containing external storage is available
-// for read and write.
+    // for read and write.
     fun isExternalStorageWritable(): Boolean {
         return Environment.getExternalStorageState() == Environment.MEDIA_MOUNTED
     }

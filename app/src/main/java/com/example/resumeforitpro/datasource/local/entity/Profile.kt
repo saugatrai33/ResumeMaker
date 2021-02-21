@@ -1,4 +1,4 @@
-package com.example.resumeforitpro.data.local.entity
+package com.example.resumeforitpro.datasource.local.entity
 
 import androidx.annotation.NonNull
 import androidx.annotation.Nullable

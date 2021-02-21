@@ -1,4 +1,4 @@
-package com.example.resumeforitpro.data.local.entity
+package com.example.resumeforitpro.datasource.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity

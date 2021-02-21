@@ -1,9 +1,7 @@
-package com.example.resumeforitpro.data.local.dao
+package com.example.resumeforitpro.datasource.local.dao
 
-import androidx.lifecycle.LiveData
 import androidx.room.*
-import com.example.resumeforitpro.data.local.entity.Education
-import com.example.resumeforitpro.data.local.entity.Experience
+import com.example.resumeforitpro.datasource.local.entity.Education
 
 @Dao
 interface EducationDao {

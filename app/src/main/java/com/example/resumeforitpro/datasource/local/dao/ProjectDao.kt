@@ -1,7 +1,7 @@
-package com.example.resumeforitpro.data.local.dao
+package com.example.resumeforitpro.datasource.local.dao
 
 import androidx.room.*
-import com.example.resumeforitpro.data.local.entity.Project
+import com.example.resumeforitpro.datasource.local.entity.Project
 
 @Dao
 interface ProjectDao {
