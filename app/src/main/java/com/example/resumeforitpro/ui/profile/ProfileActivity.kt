@@ -17,8 +17,6 @@ import com.example.resumeforitpro.R
 import com.example.resumeforitpro.data.local.DatabaseBuilder
 import com.example.resumeforitpro.data.local.DatabaseHelperImpl
 import com.example.resumeforitpro.data.local.entity.Profile
-import com.example.resumeforitpro.utils.ResumeViewModelFactory
-import com.example.resumeforitpro.utils.Status
 import com.facebook.drawee.backends.pipeline.Fresco
 import com.facebook.drawee.view.SimpleDraweeView
 import java.io.File
@@ -48,13 +46,6 @@ class ProfileActivity : AppCompatActivity() {
         setContentView(R.layout.activity_profile)
 
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
-
-        profileViewModel = ViewModelProviders.of(
-            this,
-            ResumeViewModelFactory(
-                DatabaseHelperImpl(DatabaseBuilder.getInstance(applicationContext))
-            )
-        ).get(ProfileViewModel::class.java)
         setupProfileObserver()
 
         val fileName = "Resume Picture"
@@ -155,34 +146,11 @@ class ProfileActivity : AppCompatActivity() {
             profileImgPath = ""
         )
 
-        if (CODEINSERTUPDATE == 0) {
-            profileViewModel.saveProfileToDb(newProfile = profile)
-        } else {
-            profileViewModel.updateProfile(updatedProfile = profile)
-        }
-
 
     }
 
     private fun setupProfileObserver() {
-        profileViewModel.getProfile().observe(this, {
-            when (it.status) {
-                Status.SUCCESS -> {
-                    it.data?.let { profile ->
-                        CODEINSERTUPDATE = 1
-                        profileName!!.setText(profile.name)
-                        profileAddress!!.setText(profile.address)
-                        profilePhone!!.setText(profile.phone.toString())
-                    }
-                }
-                Status.LOADING -> {
 
-                }
-                Status.ERROR -> {
-                    Log.d("MainActivity", "setupProfileObserver: error")
-                }
-            }
-        })
     }
 
     // Checks if a volume containing external storage is available
